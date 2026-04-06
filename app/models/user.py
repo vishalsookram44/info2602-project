@@ -13,16 +13,14 @@ class UserBase(SQLModel,):
 
 class User(UserBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    student: Optional["Student"] = Relationship(back_populates="user")
-    instructor: Optional["Instructor"] = Relationship(back_populates="user")
+    student_profile: Optional["Student"] = Relationship(back_populates="user")
+    instructor_profile: Optional["Instructor"] = Relationship(back_populates="user")
 
 class Student(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: Optional[int] = Field(default=None, foreign_key="user.id")
     instructor_id: Optional[int] = Field(default=None, foreign_key="instructor.id")
-    user: Optional[User] = Relationship(back_populates="student")
-
-    name: str
+    user: Optional[User] = Relationship(back_populates="student_profile")
     
     instructor: Optional["Instructor"] = Relationship(back_populates="students")
     lessons: list["Lesson"] = Relationship(back_populates="student")
@@ -31,9 +29,8 @@ class Student(SQLModel, table=True):
 class Instructor(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: Optional[int] = Field(default=None, foreign_key="user.id")
-    user: Optional["User"] = Relationship(back_populates="instructor")
+    user: Optional["User"] = Relationship(back_populates="instructor_profile")
 
-    name: str
     location: str
 
     students: list["Student"] = Relationship(back_populates="instructor")
@@ -64,3 +61,11 @@ class Message(SQLModel, table=True):
 
     sender_id: Optional[int] = Field(default=None, foreign_key="user.id")
     receiver_id: Optional[int] = Field(default=None, foreign_key="user.id")
+
+
+
+class InstructorCreate(SQLModel):
+    username: str
+    email: EmailStr
+    password: str
+    location: str

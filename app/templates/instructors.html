@@ -1,0 +1,105 @@
+{% extends "admin-base.html" %}
+
+{% block additional_styles %}
+
+<style>
+.border-dotted {
+  border-style: dotted !important;
+}
+
+.add-instructor-icon {
+   font-size: 4rem;
+   display: inline-block;
+   transition: transform 0.2s ease-in-out;
+}
+
+#add-instructor {
+   transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+   cursor: pointer;
+}
+
+#add-instructor:hover{
+   background-color: #e9ecef;
+   transform: scale(1.05);
+}
+</style>
+
+{% endblock %}
+
+{% block subpage_content %}
+
+{% if instructors %}
+      <h2 class="mb-4">Your Instructors</h2>
+      <div class="container text-center">
+         <div class="row row-cols-5 gap-4">
+            <a id="add-instructor" class="col mb-4 rounded-3 shadow-lg border border-2 border-secondary border-dotted p-0 text-decoration-none" data-bs-toggle="modal" data-bs-target="#addInstructorModal">
+               <div class="card h-100 w-100">
+                  <div class="card-body w-100">
+                     <h5 class="card-title">Add New Instructor</h5>
+                     <span class="material-symbols-outlined add-instructor-icon">add_2</span>
+                  </div>
+               </div>
+            </a>
+            {% for instructor in instructors %}
+               <div class="col mb-4 rounded-3 shadow-lg border border-2 border-secondary p-0">
+                  <div class="card h-100 w-100">
+                     <div class="card-body w-100">
+                        <h5 class="card-title">{{ instructor.user.username }}</h5>
+                        <p class="card-text">{{ instructor.location }}</p>
+                        <a href="/instructors/{{ instructor.id }}" class="btn btn-primary">Manage</a>
+                     </div>
+                  </div>
+               </div>
+            {% endfor %}
+         </div>
+      </div>
+{% else %}
+   <p>No instructors found.</p>
+{% endif %}
+
+<!-- Add Instructor Modal -->
+<div class="modal fade" id="addInstructorModal" tabindex="-1" aria-labelledby="addInstructorModalLabel" aria-hidden="true">
+   <div class="modal-dialog">
+      <form method="POST" action="/api/instructors">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h1 class="modal-title fs-5" id="addInstructorModalLabel">Add New Instructor</h1>
+               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+               <div class="input-group input-group-sm mb-2">
+                  <span class="input-group-text" id="inputGroup-sizing-default">Username</span>
+                  <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" name="username" required>
+               </div>
+               <div class="input-group input-group-sm mb-2">
+                  <span class="input-group-text" id="inputGroup-sizing-sm">Email</span>
+                  <input type="email" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm" name="email" required>
+               </div>
+               <div class="input-group input-group-sm mb-2">
+                  <span class="input-group-text" id="inputGroup-sizing-sm">Password</span>
+                  <input type="password" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm" name="password" required>
+               </div>
+               <div class="input-group input-group-sm mb-2">
+                  <span class="input-group-text" id="inputGroup-sizing-sm">Location</span>
+                  <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm" name="location" required>
+               </div>
+            </div>
+
+            <div class="modal-footer">
+               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+               <button type="submit" class="btn btn-primary">Add Instructor</button>
+            </div>
+         </div>
+      </form>
+   </div>
+</div>
+
+{% endblock %}
+
+{% block additional_scripts %}
+<script>
+   
+
+</script>
+{% endblock %}

@@ -69,15 +69,23 @@
 <div id="wrapper">
 
     <nav id="sidebar" class="p-3 d-flex flex-column vh-100">
-        <a href="/">
+        <a href="/" class="text-decoration-none">
             <h4 class="text-white mb-4 text-center py-4">Driving School</h4>
         </a>
 
         <ul class="nav nav-pills flex-column gap-2 flex-grow-1">
             <li class="nav-item">
-                <a class="nav-link d-flex align-items-center {{ 'active' if request.path == '/app' }}" href="/app">
+                <a class="nav-link d-flex align-items-center {{ 'active' if request.path == '/app' }}" href="/instructors">
                     <span class="material-symbols-outlined me-2">people</span>
-                    Users
+                    Instructors
+                </a>
+                <a class="nav-link d-flex align-items-center {{ 'active' if request.path == '/app' }}" href="/students">
+                    <span class="material-symbols-outlined me-2">school</span>
+                    Students
+                </a>
+                <a class="nav-link d-flex align-items-center {{ 'active' if request.path == '/app' }}" href="/lessons">
+                    <span class="material-symbols-outlined me-2">schedule</span>
+                    Lessons
                 </a>
             </li>
             

@@ -1,12 +1,142 @@
-{% extends "authenticated-base.html" %}
+{% extends "admin-base.html" %}
 
-{% block external_js %}
-<script src="{{ url_for('static', path='js/app.js')}}"></script>
+{% block additional_styles %}
+<style>
+.admin-hero {
+   background: linear-gradient(110deg, #1b263b 0%, #2f3e57 55%, #415a77 100%);
+   color: #fff;
+   border-radius: 1rem;
+   padding: 1.5rem;
+}
+
+.metric-box {
+   border: 1px solid #dfe5ec;
+   border-radius: 0.9rem;
+   background: #fff;
+}
+
+.metric-label {
+   font-size: 0.85rem;
+   color: #6c757d;
+}
+
+.metric-number {
+   font-size: 2rem;
+   font-weight: 700;
+   line-height: 1;
+}
+
+.users-panel {
+   border: 1px solid #dfe5ec;
+   border-radius: 1rem;
+   background: #fff;
+}
+
+.role-badge {
+   text-transform: capitalize;
+}
+
+.table thead th {
+   white-space: nowrap;
+}
+</style>
 {% endblock %}
 
 
 {% block subpage_content %}
+<div class="container-fluid px-0">
+   <div class="admin-hero mb-4 shadow-sm">
+      <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+         <div>
+            <h2 class="mb-1">Admin Dashboard</h2>
+            <p class="mb-0 opacity-75">Overview of platform activity and quick user management.</p>
+         </div>
+         <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-light" href="/instructors">
+               <span class="material-symbols-outlined align-middle">groups</span>
+               Manage Instructors
+            </a>
+            <a class="btn btn-light" href="/students">
+               <span class="material-symbols-outlined align-middle">school</span>
+               Manage Students
+            </a>
+         </div>
+      </div>
+   </div>
 
-   I am the admin page
+   <div class="row g-3 mb-4">
+      <div class="col-12 col-md-6 col-xl-3">
+         <div class="metric-box p-3 h-100">
+            <p class="metric-label mb-1">Total Users</p>
+            <p class="metric-number mb-1">{{ metrics.total_users }}</p>
+            <small class="text-secondary">All account types</small>
+         </div>
+      </div>
+      <div class="col-12 col-md-6 col-xl-3">
+         <div class="metric-box p-3 h-100">
+            <p class="metric-label mb-1">Instructors</p>
+            <p class="metric-number mb-1">{{ metrics.total_instructors }}</p>
+            <small class="text-secondary">Teaching accounts</small>
+         </div>
+      </div>
+      <div class="col-12 col-md-6 col-xl-3">
+         <div class="metric-box p-3 h-100">
+            <p class="metric-label mb-1">Students</p>
+            <p class="metric-number mb-1">{{ metrics.total_students }}</p>
+            <small class="text-secondary">Learning accounts</small>
+         </div>
+      </div>
+      <div class="col-12 col-md-6 col-xl-3">
+         <div class="metric-box p-3 h-100">
+            <p class="metric-label mb-1">Scheduled Lessons</p>
+            <p class="metric-number mb-1">{{ metrics.scheduled_lessons }}</p>
+            <small class="text-secondary">Upcoming sessions</small>
+         </div>
+      </div>
+   </div>
+
+   <div class="users-panel p-3 p-md-4 shadow-sm">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+         <h4 class="mb-0">Recent Users</h4>
+      </div>
+
+      <div class="table-responsive">
+         <table class="table table-hover align-middle" id="recentUsersTable">
+            <thead class="table-light">
+               <tr>
+                  <th scope="col">ID</th>
+                  <th scope="col">Username</th>
+                  <th scope="col">Email</th>
+                  <th scope="col">Role</th>
+               </tr>
+            </thead>
+            <tbody>
+               {% for row in recent_users %}
+               <tr>
+                  <td>{{ row.id }}</td>
+                  <td class="username-cell">{{ row.username }}</td>
+                  <td class="email-cell">{{ row.email }}</td>
+                  <td>
+                     <span class="badge role-badge {{ 'text-bg-danger' if row.role == 'admin' else 'text-bg-primary' if row.role == 'instructor' else 'text-bg-secondary' }}">
+                        {{ row.role }}
+                     </span>
+                  </td>
+               </tr>
+               {% endfor %}
+            </tbody>
+         </table>
+      </div>
+
+      {% if not recent_users %}
+      <div class="alert alert-light border mb-0" role="alert">
+         No users found.
+      </div>
+      {% endif %}
+   </div>
+</div>
+
+{% endblock %}
+
+{% block subpage_scripts %}
 
 {% endblock %}
