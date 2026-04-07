@@ -4,7 +4,7 @@ from sqlmodel import select
 
 from app.models.user import Instructor, InstructorCreate, User
 from . import api_router, templates, router
-from utilities.flash import flash
+from app.utilities.flash import flash
 
 from app.dependencies import AdminDep, SessionDep
 from fastapi import HTTPException, Request, status, Form

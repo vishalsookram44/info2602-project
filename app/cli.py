@@ -18,15 +18,15 @@ def initialize():
         testmsg = Message(content="Hello, this is a test message!", sender_id=1, receiver_id=1)
 
         db.add(bob)
-        db.add(testmsg)
         db.commit()
+        db.add(testmsg)
 
         newUser = User(username="John Doe", email="jonny@mail.com", password=encrypt_password("johnpass"), role="instructor")
         db.add(newUser)
         db.commit()
         db.refresh(newUser)
 
-        testInstructor = Instructor(user_id=newUser.id, name="John Doe", location="Arima")
+        testInstructor = Instructor(user_id=newUser.id, location="Arima")
         db.add(testInstructor)
         db.commit()
 
@@ -40,9 +40,9 @@ def show_users():
         for user in users:
             print(f"----------\nID: {user.id}\nUsername: {user.username}\nEmail: {user.email}\nRole: {user.role}\n-----------")
             if user.student_profile:
-                print(f"----------\nStudent Profile:\nName: {user.student_profile.name}\nInstructor: {user.student_profile.instructor.name}\n")
+                print(f"----------\nStudent Profile:\nName: {user.username}\nInstructor: {user.student_profile.instructor.user.username}\n")
             if user.instructor_profile:
-                print(f"----------\nInstructor Profile:\nName: {user.instructor_profile.name}\nLocation: {user.instructor_profile.location}\n")
+                print(f"----------\nInstructor Profile:\nName: {user.username}\nLocation: {user.instructor_profile.location}\n")
 
 
 
