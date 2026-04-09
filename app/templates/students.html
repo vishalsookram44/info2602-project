@@ -1,0 +1,136 @@
+{% extends "admin-base.html" %}
+
+{% block additional_styles %}
+<style>
+.border-dotted {
+    border-style: dotted !important;
+}
+
+.add-student-icon {
+    font-size: 4rem;
+    display: inline-block;
+    transition: transform 0.2s ease-in-out;
+}
+
+#add-student {
+    transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+#add-student:hover {
+    background-color: #e9ecef;
+    transform: scale(1.05);
+}
+
+.student-subtext {
+    color: #6c757d;
+    font-size: 0.95rem;
+}
+</style>
+{% endblock %}
+
+{% block subpage_content %}
+<h2 class="mb-4">Your Students</h2>
+
+<div class="container text-center">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-5 gap-4">
+        <a
+            id="add-student"
+            class="col mb-4 rounded-3 shadow-lg border border-2 border-secondary border-dotted p-0 text-decoration-none"
+            data-bs-toggle="modal"
+            data-bs-target="#addStudentModal"
+        >
+            <div class="card h-100 w-100">
+                <div class="card-body w-100 d-flex flex-column justify-content-center">
+                    <h5 class="card-title">Add New Student</h5>
+                    <span class="material-symbols-outlined add-student-icon">add_2</span>
+                </div>
+            </div>
+        </a>
+
+        {% for student in students %}
+        <div class="col mb-4 rounded-3 shadow-lg border border-2 border-secondary p-0">
+            <div class="card h-100 w-100">
+                <div class="card-body w-100">
+                    <h5 class="card-title">
+                        {{ student.user.username if student.user else "Student" }}
+                    </h5>
+                    <p class="card-text mb-1">
+                        {{ student.user.email if student.user else "No email available" }}
+                    </p>
+                    <p class="student-subtext">
+                        Instructor:
+                        {% if student.instructor and student.instructor.user %}
+                            {{ student.instructor.user.username }}
+                        {% else %}
+                            Unassigned
+                        {% endif %}
+                    </p>
+                    <a href="/students/{{ student.id }}" class="btn btn-primary">Manage</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div
+    class="modal fade"
+    id="addStudentModal"
+    tabindex="-1"
+    aria-labelledby="addStudentModalLabel"
+    aria-hidden="true"
+>
+    <div class="modal-dialog">
+        <form method="POST" action="/api/students">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="addStudentModalLabel">Add New Student</h1>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                    ></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="input-group input-group-sm mb-2">
+                        <span class="input-group-text">Username</span>
+                        <input type="text" class="form-control" name="username" required>
+                    </div>
+
+                    <div class="input-group input-group-sm mb-2">
+                        <span class="input-group-text">Email</span>
+                        <input type="email" class="form-control" name="email" required>
+                    </div>
+
+                    <div class="input-group input-group-sm mb-2">
+                        <span class="input-group-text">Password</span>
+                        <input type="password" class="form-control" name="password" required>
+                    </div>
+
+                    <div class="input-group input-group-sm mb-2">
+                        <span class="input-group-text">Instructor</span>
+                        <select class="form-select" name="instructor_id">
+                            <option value="">Unassigned</option>
+                            {% for instructor in instructors %}
+                            <option value="{{ instructor.id }}">
+                                {{ instructor.user.username if instructor.user else "Instructor " ~ instructor.id }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                    <button type="submit" class="btn btn-primary">Add Student</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
