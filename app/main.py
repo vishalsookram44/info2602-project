@@ -32,5 +32,12 @@ async def unauthorized_redirect_handler(request: Request, exc: Exception):
         name="401.html",
     )
 
+@app.exception_handler(status.HTTP_404_NOT_FOUND)
+async def not_found_redirect_handler(request: Request, exc: Exception):
+    return templates.TemplateResponse(
+        request=request, 
+        name="404.html",
+    )
+
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host=get_settings().app_host, port=get_settings().app_port, reload=get_settings().env.lower()!="production")
