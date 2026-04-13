@@ -28,6 +28,7 @@
 </div>
 
 
+{% if isInstructor %}
 <!-- Edit Lesson Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -71,6 +72,7 @@
     </div>
   </div>
 </div>
+{% endif %}
 
 
 {% if isInstructor %}
@@ -120,6 +122,7 @@
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.20/index.global.min.js'></script>
 <script>
     lessons = {{ lessons|tojson }};
+    const isInstructor = {{ isInstructor|default(False)|tojson }};
     
     document.addEventListener('DOMContentLoaded', function() {
         console.log("Lessons data passed to template:", lessons);
@@ -155,12 +158,15 @@
                 center: 'title',
             },
             events: events,
-            eventClick: editLesson,
+          eventClick: isInstructor ? editLesson : null,
         });
         calendar.render();
     });
 
     function editLesson(info) {
+        if (!isInstructor) {
+          return;
+        }
         info.jsEvent.preventDefault();
 
         const lessonId = info.event.extendedProps.lessonId || info.event.id;
