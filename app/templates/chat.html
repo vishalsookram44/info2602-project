@@ -1,0 +1,284 @@
+{% if isStudent %}
+    {% extends "student-base.html" %}
+{% elif isInstructor %}
+    {% extends "instructor-base.html" %}
+{% endif %}
+
+{% block additional_styles %}
+<style>
+body {
+	overflow: hidden;
+}
+
+#wrapper {
+	height: 100vh;
+	overflow: hidden;
+}
+
+#content {
+	height: 100vh;
+	overflow: hidden;
+}
+
+.chat-page {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.chat-hero {
+	background: linear-gradient(115deg, #1f4068 0%, #2b5876 58%, #4e4376 100%);
+	color: #fff;
+	border-radius: 1rem;
+	padding: 1.15rem 1.25rem;
+}
+
+.chat-shell {
+	border: 1px solid #dfe5ec;
+	border-radius: 1rem;
+	background: #fff;
+	overflow: hidden;
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.chat-header {
+	border-bottom: 1px solid #e9ecef;
+	background: #f8fafc;
+}
+
+.status-pill {
+	font-size: 0.78rem;
+	padding: 0.35rem 0.65rem;
+	border-radius: 999px;
+	border: 1px solid #cce3ff;
+	color: #0c63e4;
+	background: #eaf3ff;
+}
+
+.chat-thread {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	background:
+		radial-gradient(circle at 12% 10%, rgba(13, 110, 253, 0.06), transparent 28%),
+		radial-gradient(circle at 90% 92%, rgba(32, 201, 151, 0.07), transparent 30%),
+		#fcfdff;
+}
+
+.message-row {
+	display: flex;
+}
+
+.message-row.me {
+	justify-content: flex-end;
+}
+
+.message-bubble {
+	max-width: min(82%, 640px);
+	border-radius: 0.95rem;
+	padding: 0.75rem 0.9rem;
+	border: 1px solid #e3e8ef;
+	background: #fff;
+}
+
+.message-row.me .message-bubble {
+	border-color: #b6dbff;
+	background: linear-gradient(180deg, #edf6ff 0%, #e3f1ff 100%);
+}
+
+.message-author {
+	font-size: 0.8rem;
+	font-weight: 600;
+	margin-bottom: 0.2rem;
+	color: #495057;
+}
+
+.message-text {
+	margin-bottom: 0.45rem;
+	color: #212529;
+}
+
+.message-time {
+	margin-bottom: 0;
+	font-size: 0.75rem;
+	color: #6c757d;
+	text-align: right;
+}
+
+.chat-composer {
+	border-top: 1px solid #e9ecef;
+	background: #fff;
+}
+
+.chat-composer textarea {
+	resize: none;
+}
+
+.quick-prompts .btn {
+	border-radius: 999px;
+}
+</style>
+{% endblock %}
+
+{% block subpage_content %}
+<div
+	class="container-fluid px-0 chat-page"
+	id="chatPage"
+	data-current-user-id="{{ user.id if user and user.id else '' }}"
+	data-chat-partner-user-id="{{ chat_partner_user_id if chat_partner_user_id else '' }}"
+	data-chat-partner-name="{{ chat_partner_name if chat_partner_name else 'Partner' }}"
+>
+	<div class="chat-hero mb-4 shadow-sm">
+		<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+			<div>
+                {% if isInstructor %}
+                <a href="/mystudents" class="btn btn-light btn-sm mb-3">
+                    <span class="material-symbols-outlined align-middle">arrow_back</span>
+                    Back to Students
+                </a>
+                {% endif %}
+				<h2 class="mb-1">
+                    Chat With
+                   {% if isStudent %}
+                        {{ student.instructor.user.username if student.instructor else "TBA" }}
+                    {% elif isInstructor %}
+                        {{ student.user.username }}
+                    {% endif %}
+                </h2>
+				<p class="mb-0 opacity-75">Ask questions, confirm lesson details, and keep everything in one thread.</p>
+			</div>
+		</div>
+	</div>
+
+	<div class="chat-shell shadow-sm">
+        
+		<div id="chatThread" class="chat-thread p-3 p-md-4">
+			{% if messages and (messages | length > 0) %}
+				{% for message in messages %}
+				<div class="message-row {% if message.sender_id == user.id %}me{% endif %} mb-3">
+					<div class="message-bubble shadow-sm">
+						<p class="message-author">
+							{% if message.sender_id == user.id %}
+								You
+							{% elif isInstructor %}
+								{{ student.user.username if student and student.user else "Student" }}
+							{% else %}
+								{{ student.instructor.user.username if student and student.instructor and student.instructor.user else "Instructor" }}
+							{% endif %}
+						</p>
+						<p class="message-text">{{ message.content }}</p>
+						<p class="message-time">{{ message.timestamp.strftime("%I:%M %p") if message.timestamp else "" }}</p>
+					</div>
+				</div>
+				{% endfor %}
+			{% else %}
+			<div class="alert alert-light border mb-0" role="alert">
+				No messages yet. Start the conversation.
+			</div>
+			{% endif %}
+		</div>
+
+		<div class="chat-composer p-3 p-md-4">
+			<label for="messageDraft" class="form-label fw-semibold mb-2">Message</label>
+			<form id="messageForm" action="" method="post">
+				<textarea id="messageDraft" name="messageDraft" class="form-control mb-3" rows="3" placeholder="Type your message here..." aria-label="Message draft" {% if not chat_partner_user_id %}disabled{% endif %}></textarea>
+
+                <div class="d-flex justify-content-end">
+					<button id="sendButton" type="submit" class="btn btn-primary" {% if not chat_partner_user_id %}disabled{% endif %}>Send</button>
+                </div>
+			</form>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block subpage_scripts %}
+<script>
+const chatPage = document.getElementById("chatPage");
+const currentUserId = chatPage && chatPage.dataset.currentUserId ? Number(chatPage.dataset.currentUserId) : null;
+const chatPartnerUserId = chatPage && chatPage.dataset.chatPartnerUserId ? Number(chatPage.dataset.chatPartnerUserId) : null;
+const chatPartnerName = chatPage && chatPage.dataset.chatPartnerName ? chatPage.dataset.chatPartnerName : "Partner";
+
+const chatThread = document.getElementById("chatThread");
+const messageForm = document.getElementById("messageForm");
+const messageDraft = document.getElementById("messageDraft");
+
+function escapeHtml(value) {
+	return String(value)
+		.replaceAll("&", "&amp;")
+		.replaceAll("<", "&lt;")
+		.replaceAll(">", "&gt;")
+		.replaceAll('"', "&quot;")
+		.replaceAll("'", "&#039;");
+}
+
+function scrollToBottom() {
+	if (chatThread) {
+		chatThread.scrollTop = chatThread.scrollHeight;
+	}
+}
+
+function appendMessage(message) {
+	if (!chatThread) {
+		return;
+	}
+
+	const emptyState = chatThread.querySelector(".alert");
+	if (emptyState) {
+		emptyState.remove();
+	}
+
+	const isMine = Number(message.sender_id) === Number(currentUserId);
+	const author = isMine ? "You" : chatPartnerName;
+	const row = document.createElement("div");
+	row.className = `message-row ${isMine ? "me" : ""} mb-3`;
+	row.innerHTML = `
+		<div class="message-bubble shadow-sm">
+			<p class="message-author">${escapeHtml(author)}</p>
+			<p class="message-text">${escapeHtml(message.content)}</p>
+			<p class="message-time">${escapeHtml(message.timestamp || "")}</p>
+		</div>
+	`;
+
+	chatThread.appendChild(row);
+	scrollToBottom();
+}
+
+if (messageForm) {
+	messageForm.addEventListener("submit", function (event) {
+		event.preventDefault();
+		if (!socket || socket.readyState !== WebSocket.OPEN) {
+			return;
+		}
+
+		const content = messageDraft.value.trim();
+		if (!content) {
+			return;
+		}
+
+		socket.send(content);
+		messageDraft.value = "";
+		messageDraft.focus();
+	});
+}
+
+let socket = null;
+if (chatPartnerUserId !== null) {
+	const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+	const wsUrl = `${wsProtocol}://${window.location.host}/ws/chat/${chatPartnerUserId}`;
+	socket = new WebSocket(wsUrl);
+
+	socket.onmessage = function (event) {
+		const message = JSON.parse(event.data);
+		appendMessage(message);
+	};
+}
+
+scrollToBottom();
+
+</script>
+{% endblock %}
